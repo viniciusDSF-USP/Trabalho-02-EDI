@@ -3,24 +3,131 @@
 #include <string.h>
 #include "aluno.h"
 
-Lista *CriarListaNroUSP(){
-    return NULL;
+int inserir_filme_fav(NoLista **p, No **filme){
+	if (*p == NULL){
+		NoLista *new = (NoLista *) malloc(sizeof(NoLista));
+			
+		if (new != NULL){
+			new->filme = *filme;
+			new->prox = NULL;
+
+			(*filme)->info.filme.frequencia++;
+
+			*p = new;
+			
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	if ((*p)->filme == NULL){
+		int aux = inserir_filme_fav(&(*p)->prox, filme);
+
+		if (aux == -1){
+			NoLista *new = (NoLista *) malloc(sizeof(NoLista));
+			
+			if (new != NULL){
+				new->filme = *filme;
+				new->prox = (*p)->prox;
+				(*p)->prox = new;
+
+				(*filme)->info.filme.frequencia++;
+				
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+
+		return aux;
+	}
+	
+	if (strcmp((*filme)->info.filme.nome, (*p)->filme->info.filme.nome) < 0){ // filme < p
+		return -1;
+	} else if (strcmp((*filme)->info.filme.nome, (*p)->filme->info.filme.nome) > 0){ // filme > p
+		int aux = inserir_filme_fav(&(*p)->prox, filme);
+		
+		if (aux == -1){
+			NoLista *new = (NoLista *) malloc(sizeof(NoLista));
+			
+			if (new != NULL){
+				new->filme = *filme;
+				new->prox = (*p)->prox;
+				(*p)->prox = new;
+
+				(*filme)->info.filme.frequencia++;
+				
+				return 1;
+			} else {
+				return 0;
+			}
+		} else
+			return aux;
+	} else { // filme == p
+		return 0;
+	}
 }
 
-int inserirListaNroUSP(No *raiz_filme, NoLista **p, elem *x){
-    return 0;
+int remover_filme_fav(NoLista **p, No **filme){
+	if (*p == NULL)
+		return 0;
+
+	if ((*p)->filme == NULL){
+		int aux = remover_filme_fav(&(*p)->prox, filme);
+		if (aux == -1){
+			(*p)->prox = (*p)->prox->prox;
+			free((*p)->prox);
+			
+			(*filme)->info.filme.frequencia--;
+			
+			return 1;
+		}
+		return aux;
+	}
+	
+	if (strcmp((*filme)->info.filme.nome, (*p)->filme->info.filme.nome) == 0) // filme == p
+		return -1;
+	
+	return remover_filme_fav(&(*p)->prox, filme);
 }
 
-int removerListaNroUSP(No *raiz_filme, NoLista **p, elem *x){
-    return 0;
-}
+int limpar_filmes_fav(NoLista **p, No **raiz_filmes){
+	if (*p == NULL)
+		return 1;
+	
+	if ((*p)->filme == NULL){
+		int aux = limpar_filmes_fav(&(*p)->prox, raiz_filmes);
 
-int inserir_aluno(No **p, elem *x, NoLista *s){
-    return 0;
-}
+		if (aux){
+			free(*p);
+			*p = NULL;
+			return 1;
+		}
 
-int remover_aluno(No **p, elem *x){
-    return 0;
+		return aux;
+	}
+	
+	if (limpar_filmes_fav(&(*p)->prox, raiz_filmes)){
+		(*p)->filme->info.filme.frequencia--;
+
+		if ((*p)->filme->info.filme.frequencia == 0){
+			elem aux;
+
+			aux.info.filme.nome = (*p)->filme->info.filme.nome;
+			aux.tipo = Filme;
+
+			if (!remover(raiz_filmes, &aux))
+				return 0;
+		}
+
+		free(*p);
+		*p = NULL;
+
+		return 1;
+	}
+
+	return 0;
 }
 
 No *sugerir_similar(No *p, elem *x){
