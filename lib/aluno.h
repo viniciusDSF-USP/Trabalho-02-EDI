@@ -1,13 +1,10 @@
 #include "filme.h"
 
-Lista *CriarListaNroUSP();
-int inserirListaNroUSP(No *raiz_filme, NoLista **p, elem *x);
-int removerListaNroUSP(No *raiz_filme, NoLista **p, elem *x);
+int inserir_filme_fav(NoLista **p, No **filme);
+int remover_filme_fav(NoLista **p, No **filme);
+int limpar_filmes_fav(NoLista **p, No **raiz_filmes);
 
 // p: Raiz da AVL Aluno
-
-int inserir_aluno(No **p, elem *x, NoLista *s);
-int remover_aluno(No **p, elem *x);
 
 /* Indicar ao aluno 'x' um(1) colega de turma
 que tenha varios filmes em comum
@@ -46,13 +43,6 @@ Inserir Lista: Busca na AVL de Filmes se tem o elemento, se ja tiver aumenta um 
 
 Remover Lista: Busca na AVL de Filmes se tem o elemento, se ja tiver diminui um na frequencia.
  Se a frequencia virar zero, remove na AVL de Filmes com remover_filme();
-
-Inserir Aluno: Insere na AVL de Aluno usando o inserir() do avl.h, concatenando o inicio da Lista
- no *filmes_fav;
-
-Remover Aluno: Busca o aluno 'x' na arvore AVL de Alunos, se encontrar remove todos os filmes
- da Lista de filmes favoritos (usando o remover_filme() para cada NoLista), depois remove o No
- 'x' encontrado da arvore AVL de Alunos, que vai usar remover() do avl.h;
 
 Sugerir Similar: Busca o aluno 'x' na arvore AVL de Alunos, percorre a arvore ate encontrar
  alguem que tenha pelo menos um filme em comum com o aluno 'x'. Se tiver retorna esse aluno 'y';

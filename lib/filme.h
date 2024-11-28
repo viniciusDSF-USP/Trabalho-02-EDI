@@ -5,8 +5,6 @@ int inserirListaFreq(No *raiz_filme, NoLista **p, elem *x);
 
 // p: Raiz da AVL Filme
 
-int inserir_filme(No **p, elem *x); // Usa o 'inserir' do avl.h
-int remover_filme(No **p, elem *x); // Usa o 'remover' do avl.h
 void mais_queridos(); // Ordena a AVL em uma Lista por frequencia
 
 /*

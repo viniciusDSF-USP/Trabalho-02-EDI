@@ -18,6 +18,12 @@ void finalizarLista(NoLista **p){
 
     finalizarLista(&(*p)->prox);
 
+	if ((*p)->filme != NULL){
+		(*p)->filme->info.filme.frequencia--;
+	} else {
+		free((*p)->filme);
+	}
+	
     free(*p);
     *p = NULL;
 }
@@ -49,9 +55,9 @@ No **buscar(No **p, elem *x) {
 
     switch ((*p)->tipo){
         case Aluno:
-            if ((*x).aluno.nroUSP == (*p)->info.aluno.nroUSP){
+            if (x->info.aluno.nroUSP == (*p)->info.aluno.nroUSP){
                 return p;
-            } else if ((*x).aluno.nroUSP < (*p)->info.aluno.nroUSP) {
+            } else if (x->info.aluno.nroUSP < (*p)->info.aluno.nroUSP) {
                 return buscar(&(*p)->esq, x);
             } else {
                 return buscar(&(*p)->dir, x);
@@ -59,15 +65,17 @@ No **buscar(No **p, elem *x) {
             break;
         
         case Filme:
-            if (strcmp((*x).filme.nome, (*p)->info.filme.nome) == 0){
+            if (strcmp(x->info.filme.nome, (*p)->info.filme.nome) == 0){
                 return p;
-            } else if (strcmp((*x).filme.nome, (*p)->info.filme.nome) <= -1) {
+            } else if (strcmp(x->info.filme.nome, (*p)->info.filme.nome) <= -1) {
                 return buscar(&(*p)->esq, x);
             } else {
                 return buscar(&(*p)->dir, x);
             }
             break;
     }
+
+    return NULL;
 }
 
 int altura(No *p){
@@ -109,12 +117,12 @@ void rot_dir(No **a){
 	*a = b;
 }
 
-int inserir(No **p, elem *x, int tipo) {
+int inserir(No **p, elem *x) {
     if (*p == NULL){
 		No *new = (No *) malloc(sizeof(No));
 		
 		if (new != NULL){
-			switch (tipo){
+			switch (x->tipo){
                 case Aluno:
                     new->info.aluno.nome = (char *) malloc(STRLIM * sizeof(char));
 
@@ -123,8 +131,22 @@ int inserir(No **p, elem *x, int tipo) {
                         return 0;
                     }
 
-                    strcpy(new->info.aluno.nome, x->aluno.nome);
-                    new->info.aluno.nroUSP = x->aluno.nroUSP;
+                    strcpy(new->info.aluno.nome, x->info.aluno.nome);
+                    new->info.aluno.nroUSP = x->info.aluno.nroUSP;
+                    
+                    NoLista *head = (NoLista *) malloc(sizeof(NoLista));
+			
+					if (head != NULL){
+						head->filme = NULL;
+						head->prox = NULL;
+						
+						new->info.aluno.filmes_fav = head;
+					} else {
+						free(new->info.aluno.nome);
+						free(new);
+						return 0;
+					}
+					
                     break;
                 
                 case Filme:
@@ -135,12 +157,12 @@ int inserir(No **p, elem *x, int tipo) {
                         return 0;
                     }
 
-                    strcpy(new->info.filme.nome, x->filme.nome);
+                    strcpy(new->info.filme.nome, x->info.filme.nome);
                     new->info.filme.frequencia = 0;
                     break;
             }
 
-            new->tipo = tipo;
+            new->tipo = x->tipo;
 			new->FB = 0;
 			new->altura = 1;
 			new->esq = new->dir = NULL;
@@ -155,21 +177,21 @@ int inserir(No **p, elem *x, int tipo) {
 	
 	int E = 0, D = 0;
 
-    switch (tipo){
+    switch (x->tipo){
         case Aluno:
-            if (x->aluno.nroUSP < (*p)->info.aluno.nroUSP)
-                E = inserir(&(*p)->esq, x, tipo);
-            else if (x->aluno.nroUSP > (*p)->info.aluno.nroUSP)
-                D = inserir(&(*p)->dir, x, tipo);
+            if (x->info.aluno.nroUSP < (*p)->info.aluno.nroUSP)
+                E = inserir(&(*p)->esq, x);
+            else if (x->info.aluno.nroUSP > (*p)->info.aluno.nroUSP)
+                D = inserir(&(*p)->dir, x);
             else
                 return 0;
             break;
         
         case Filme:
-            if (strcmp(x->filme.nome, (*p)->info.filme.nome) <= -1)
-                E = inserir(&(*p)->esq, x, tipo);
-            else if (strcmp(x->filme.nome, (*p)->info.filme.nome) >= 1)
-                D = inserir(&(*p)->dir, x, tipo);
+            if (strcmp(x->info.filme.nome, (*p)->info.filme.nome) <= -1)
+                E = inserir(&(*p)->esq, x);
+            else if (strcmp(x->info.filme.nome, (*p)->info.filme.nome) >= 1)
+                D = inserir(&(*p)->dir, x);
             else {
                 (*p)->info.filme.frequencia++;
                 return 0;
@@ -208,9 +230,9 @@ int remover(No **p, elem *x) {
 
     switch ((*p)->tipo){
         case Aluno:
-            if (x->aluno.nroUSP < (*p)->info.aluno.nroUSP)
+            if (x->info.aluno.nroUSP < (*p)->info.aluno.nroUSP)
                 E = remover(&(*p)->esq, x);
-            else if (x->aluno.nroUSP > (*p)->info.aluno.nroUSP)
+            else if (x->info.aluno.nroUSP > (*p)->info.aluno.nroUSP)
                 D = remover(&(*p)->dir, x);
             else {
                 if ((*p)->esq == NULL && (*p)->dir == NULL){
@@ -236,8 +258,8 @@ int remover(No **p, elem *x) {
                     strcpy((*p)->info.aluno.nome, aux->info.aluno.nome);
                     (*p)->info.aluno.nroUSP = aux->info.aluno.nroUSP;
 
-                    strcpy(aux->info.aluno.nome, x->aluno.nome);
-                    aux->info.aluno.nroUSP = x->aluno.nroUSP;
+                    //strcpy(aux->info.aluno.nome, x->info.aluno.nome); // Nao precisa pq quando encontrar o aux ele vai ser removido
+                    aux->info.aluno.nroUSP = x->info.aluno.nroUSP;
 
                     E = remover(&(*p)->esq, x);
                 }
@@ -245,9 +267,9 @@ int remover(No **p, elem *x) {
             break;
         
         case Filme:
-            if (strcmp(x->filme.nome, (*p)->info.filme.nome) <= -1)
+            if (strcmp(x->info.filme.nome, (*p)->info.filme.nome) <= -1)
                 E = remover(&(*p)->esq, x);
-            else if (strcmp(x->filme.nome, (*p)->info.filme.nome) >= 1)
+            else if (strcmp(x->info.filme.nome, (*p)->info.filme.nome) >= 1)
                 D = remover(&(*p)->dir, x);
             else {
                 if ((*p)->esq == NULL && (*p)->dir == NULL){
@@ -273,7 +295,8 @@ int remover(No **p, elem *x) {
                     strcpy((*p)->info.filme.nome, aux->info.filme.nome);
                     (*p)->info.filme.frequencia = aux->info.filme.frequencia;
 
-                    strcpy(aux->info.filme.nome, x->filme.nome);
+                    strcpy(aux->info.filme.nome, x->info.filme.nome);
+                    //aux->info.filme.frequencia = x->info.filme.frequencia; // Nao precisa pq quando encontrar o aux ele vai ser removido
 
                     E = remover(&(*p)->esq, x);
                 }
@@ -305,26 +328,27 @@ void imprimir_recursivo(No *p){ // Em ordem
     imprimir_recursivo(p->esq);
 
     if (p->esq != NULL)
-        printf(", ");
+        printf("\n");
 
     switch (p->tipo){
         case Aluno:
-            printf("(%s, %d)", p->info.aluno.nome, p->info.aluno.nroUSP);
+            //printf("(%s, %d)", p->info.aluno.nome, p->info.aluno.nroUSP);
+            printf("\t%s - %d", p->info.aluno.nome, p->info.aluno.nroUSP);
             break;
         case Filme:
-            printf("(%s, %d)", p->info.filme.nome, p->info.filme.frequencia);
+            //printf("(%s, %d)", p->info.filme.nome, p->info.filme.frequencia);
+            printf("\t%s", p->info.filme.nome);
             break;
     }
 
     if (p->dir != NULL)
-        printf(", ");
+        printf("\n");
 
     imprimir_recursivo(p->dir);
 }
 
-void imprimirAVL(AVL *A) {
+void imprimirAVL(AVL *A) {	
     imprimir_recursivo(A->raiz);
-    printf("\n");
 }
 
 void imprimir_recursivo_2(No *p, int spaces){
