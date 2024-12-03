@@ -9,16 +9,12 @@ int limpar_filmes_fav(NoLista **p, No **raiz_filmes);
 /* Indicar ao aluno 'x' um(1) colega de turma
 que tenha varios filmes em comum
 em sua lista de favoritos */
-No *sugerir_similar(No *p, elem *x);
+No *sugerir_similar(AVL *arvore, int nroUSP);
 
 /* Indicar ao aluno 'x' um(1) colega de turma
 que tenha poucos ou nenhum filme em comum
 em sua lista de favoritos */
-No *sugerir_inedito(No *p, elem *x);
-
-/* O usuario pode produzir um arquivo texto com
-todas as informacoes armazenadas no sistema */
-int salvar_sistema(No *p);
+No *sugerir_diferente(No *p, elem *x);
 
 int numero_alunos(No *p);
 
@@ -28,11 +24,6 @@ Logo, a funcao abaixo eh OBSOLETA. Pode ser deletada */
 //int altura_arvore(No *p);
 
 int maior_FB(No *p);
-
-/* Funcao para fazer a leitura dos 
-usuarios a serem cadastrados e suas preferencias
-a partir de um arquivo */
-int inserir_de_arquivo(No **p, char *nome_arquivo); //Opcional
 
 /*
 Criar Lista: Cria uma Lista ordenada alfabeticamente pelo nome dos No de Filmes, com sentinela
@@ -47,12 +38,6 @@ Remover Lista: Busca na AVL de Filmes se tem o elemento, se ja tiver diminui um 
 Sugerir Similar: Busca o aluno 'x' na arvore AVL de Alunos, percorre a arvore ate encontrar
  alguem que tenha pelo menos um filme em comum com o aluno 'x'. Se tiver retorna esse aluno 'y';
 
-Sugerir Inedito: Busca o aluno 'x' na arvore AVL de Alunos, percorre a arvore ate encontrar
+Sugerir Diferente: Busca o aluno 'x' na arvore AVL de Alunos, percorre a arvore ate encontrar
  alguem que tenha zero filmes em comum com o aluno 'x'. Se tiver retorna essa aluno 'y';
-
-Salvar Sistema: Percorre em ordem a arvore AVL de Alunos, depois a de Filmes e salva em um .txt;
-
-Inserir de Arquivo: Lemos um arquivo que tenha "NOME|NRO_USP|FILME1;FILME2;FILME3;...;FILMEN",
- separamos NOME, NRO_USP, LISTA com o separador '|' e separamos os NoLista da Lista por ';'.
- Depois, fazemos o mesmo procedimento de Inserir Aluno acima;
 */

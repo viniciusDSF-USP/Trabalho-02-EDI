@@ -130,34 +130,70 @@ int limpar_filmes_fav(NoLista **p, No **raiz_filmes){
 	return 0;
 }
 
-No *sugerir_similar(No *p, elem *x){
+typedef struct Resultado {
+    No *aluno;
+    int filmes_similares;
+} Resultado;
+
+void comparar_filmes(NoLista *lista1, NoLista *lista2, Resultado *resultado, No *aluno_atual) {
+    int similares = 0;
+    NoLista *aux1 = lista1;
+    NoLista *aux2 = lista2;
+
+    while (aux1 != NULL && aux2 != NULL) {
+        if (aux1->filme != NULL && aux2->filme != NULL) {
+            int cmp = strcmp(aux1->filme->info.filme.nome, aux2->filme->info.filme.nome);
+
+            if (cmp == 0) {
+                similares++;
+                aux1 = aux1->prox;
+                aux2 = aux2->prox;
+            } else if (cmp < 0) {
+                aux1 = aux1->prox;
+            } else {
+                aux2 = aux2->prox;
+            }
+        } else {
+            break;
+        }
+    }
+
+
+    if (similares > resultado->filmes_similares) {
+        resultado->filmes_similares = similares;
+        resultado->aluno = aluno_atual;
+    }
+}
+
+void buscar_aluno_similar(No *raiz, No *aluno_chave, Resultado *resultado) {
+    if (raiz == NULL) return;
+
+    if (raiz->tipo == Aluno && raiz != aluno_chave) {
+        comparar_filmes(aluno_chave->info.aluno.filmes_fav, raiz->info.aluno.filmes_fav, resultado, raiz);
+    }
+
+    buscar_aluno_similar(raiz->esq, aluno_chave, resultado);
+    buscar_aluno_similar(raiz->dir, aluno_chave, resultado);
+}
+
+No *sugerir_similar(AVL *arvore, int nroUSP) {
+    elem chave;
+    chave.tipo = Aluno;
+    chave.info.aluno.nroUSP = nroUSP;
+
+    No **aluno_chave = buscar(&arvore->raiz, &chave);
+    if (aluno_chave == NULL || *aluno_chave == NULL) {
+        printf("Aluno não encontrado.\n");
+        return NULL;
+    }
+
+    Resultado resultado = {NULL, 0};
+
+    buscar_aluno_similar(arvore->raiz, *aluno_chave, &resultado);
+
+    return resultado.aluno;
+}
+
+No *sugerir_diferente(No *p, elem *x){
     return NULL;
-}
-
-No *sugerir_inedito(No *p, elem *x){
-    return NULL;
-}
-
-int salvar_sistema(No *p){
-    return 0;
-}
-
-int numero_alunos(No *p){
-    if (p != NULL) return 0;
-
-    return 1 + numero_alunos(p->esq) + numero_alunos(p->dir);
-}
-
-int maior_FB(No *p){
-    if (p == NULL) return 0;
-
-    if (p->FB == -1 || p->FB == 1) return 1;
-    int E = maior_FB(p->esq);
-    int D = maior_FB(p->dir);
-
-    return E || D;
-}
-
-int inserir_de_arquivo(No **p, char *nome_arquivo){
-    return 0;
 }
