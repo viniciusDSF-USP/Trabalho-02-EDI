@@ -3,6 +3,47 @@
 #include <string.h>
 #include "avl.h"
 
+int altura(No *p){
+    if (p == NULL) return 0;
+    return p->altura;
+}
+
+int numero_nos(No *p){
+    if (p != NULL) return 0;
+
+    return 1 + numero_nos(p->esq) + numero_nos(p->dir);
+}
+
+int maior_FB(No *p){
+    if (p == NULL) return 0;
+
+    if (p->FB == -1 || p->FB == 1) return 1;
+    int E = maior_FB(p->esq);
+    int D = maior_FB(p->dir);
+
+    return E || D;
+}
+
+int dados_tecnicos_arvores(AVL *A){
+    if (A->raiz == NULL) return 0;
+    
+    switch (A->raiz->tipo){
+        case Aluno:
+            printf("AVL de Alunos:\n");
+            break;
+        
+        case Filme:
+            printf("AVL de Filmes:\n");
+            break;
+    }
+
+    printf("\tNumero de nos: %d\n", numero_nos(A->raiz));
+    printf("\tAltura total: %d\n", altura(A->raiz));
+    printf("\tMaior fator de balanceamento (em modulo): %d\n", maior_FB(A->raiz));
+
+    return 1;
+}
+
 AVL *CriarAVL() {
     AVL *A = (AVL *) malloc(sizeof(AVL));
 
@@ -78,11 +119,6 @@ No **buscar(No **p, elem *x) {
     return NULL;
 }
 
-int altura(No *p){
-	if (p == NULL) return 0;
-	return p->altura;
-}
-
 int max(int a, int b){
 	return a > b ? a : b;
 }
@@ -101,7 +137,7 @@ void rot_esq(No **a){
 	
 	*a = b;
 }
-
+    
 void rot_dir(No **a){
 	No *b = (*a)->esq;
 	
@@ -378,4 +414,86 @@ void imprimirGrafo(AVL *A){
     printf("\n--------------\n");
     imprimir_recursivo_2(A->raiz, 0);
     printf("----------------\n\n");
+}
+
+void salvar_recursivo(No *p, FILE* file) {
+    fprintf(file, "%s;%d", p->info.aluno.nome, p->info.aluno.nroUSP);
+
+    NoLista* no = p->info.aluno.filmes_fav;
+    do {
+        fprintf(file, ";%s", no->filme->info.filme.nome);
+    } while((no = no->prox) != NULL);
+    fprintf(file, "\n");
+}
+
+int salvar_sistema(AVL *A){
+    FILE *file;
+    file = fopen("save.txt", "w");
+    
+    salvar_recursivo(A->raiz, file);
+    return 0;
+}
+
+void ler_recursivo(AVL *alunos, AVL *filmes, FILE* file) {
+    char* line;
+    fgets(line, 100000, file);
+    
+    char* endptr;
+    long nroUsp = strtol(strtok(line, ";"), &endptr, 10);
+
+    char* nome = strtok(NULL, ";");
+    
+    printf("\tNome do Aluno: ");
+    
+    elem* e;
+    e->tipo = Aluno;
+    e->info.aluno.nroUSP = (int) nroUsp;
+    e->info.aluno.nome = nome;
+    e->info.aluno.filmes_fav = (NoLista*) malloc(sizeof(NoLista));
+
+    NoLista* p = e->info.aluno.filmes_fav;
+    
+    char* token;
+    while ((token = strtok(NULL, ";")) != NULL) {
+        inserir();
+    }
+
+    inserir(alunos->raiz, e);    
+}
+
+/*
+case 1: // Cadastrar aluno
+    printf("Cadastrar aluno\n\n");
+    printf("\tNome do Aluno: ");
+    
+    getchar();
+    fgets(string, STRLIM, stdin);
+    string[strcspn(string, "\n")] = 0;
+    
+    x.info.aluno.nome = string;
+    
+    printf("\tNumero USP: ");
+    if (scanf("%d", &x.info.aluno.nroUSP) != 1){
+        while (getchar() != '\n'); // Limpa o buffer
+        printf("Erro ao cadastrar o aluno!");
+        break;
+    }
+    
+    x.tipo = Aluno;
+    
+    if (inserir(&Alunos->raiz, &x)){
+        printf("Aluno cadastrado com sucesso!");
+    } else {
+        printf("Erro ao cadastrar o aluno!");
+    }
+    
+    break;
+*/
+
+ler_de_arquivo(AVL *alunos, AVL* filmes, char *nome_arquivo){
+    FILE *file;
+    file = fopen(nome_arquivo, "r");
+    if (file == NULL) return -1;
+    
+    ler_recursivo(alunos, file);
 }

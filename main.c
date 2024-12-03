@@ -51,7 +51,7 @@ int main(){
     
     switch(choice){
     	case 1:
-    		system("clear");
+    		system("cls");
     		
     		break;
     		
@@ -78,7 +78,7 @@ int main(){
 		}
     	printf("\n");
     	
-    	if (choice > 0 && choice <= 16) system("clear");
+    	if (choice > 0 && choice <= 16) system("cls");
     	
     	switch(choice){
     		case 0: // Sair
@@ -300,7 +300,14 @@ int main(){
     		case 11:
     			break;
     		
-    		case 12:
+    		case 12: // Mostrar dados das arvores
+				if (!dados_tecnicos_arvores(Alunos))
+					printf("Nao ha alunos cadastrados!");
+
+				printf("\n");
+
+				if (!dados_tecnicos_arvores(Filmes))
+					printf("Nao ha filmes cadastrados!");
     			break;
     		
     		case 13:
