@@ -1,5 +1,5 @@
 #define STRLIM 100
-#define TAB 12
+#define TAB 17
 
 typedef enum {Aluno, Filme} type;
 
@@ -11,7 +11,7 @@ typedef struct blocoLista {
 } NoLista;
 
 typedef struct {
-    No *ini;
+    NoLista *ini;
 } Lista;
 
 typedef union {
@@ -24,10 +24,15 @@ typedef union {
         char *nome;
         int frequencia;
     } filme;
+} elem_union;
+
+typedef struct {
+	elem_union info;
+	type tipo;
 } elem;
 
 struct bloco {
-    elem info;
+    elem_union info;
     type tipo;
 
     int FB, altura;
@@ -40,12 +45,19 @@ typedef struct{
 
 // Metodos
 
+void finalizarLista(NoLista **p);
+
 AVL *CriarAVL();
 void FinalizarAVL(No **p);
+
 No **buscar(No **p, elem *x);
-int inserir(No **p, elem *x, int tipo);
+int inserir(No **p, elem *x);
 int remover(No **p, elem *x);
+
 void imprimirAVL(AVL *A);
 void imprimirGrafo(AVL *A);
 
-void finalizarLista(NoLista **p);
+int altura(No *p);
+int imprimir_dadosAVL(AVL *A);
+
+int salvar_sistema(AVL *A);

@@ -3,54 +3,243 @@
 #include <string.h>
 #include "aluno.h"
 
-Lista *CriarListaNroUSP(){
-    return NULL;
+int inserir_filme_fav(NoLista **p, No **filme){
+	if (*p == NULL)
+		return -1;
+
+	if ((*p)->filme == NULL){
+		int aux = inserir_filme_fav(&(*p)->prox, filme);
+
+		if (aux == -1){
+			NoLista *new = (NoLista *) malloc(sizeof(NoLista));
+			
+			if (new != NULL){
+				new->filme = *filme;
+				new->prox = (*p)->prox;
+				(*p)->prox = new;
+
+				(*filme)->info.filme.frequencia++;
+				
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+
+		return aux;
+	}
+	
+	if (strcmp((*filme)->info.filme.nome, (*p)->filme->info.filme.nome) < 0){ // filme < p
+		return -1;
+	} else if (strcmp((*filme)->info.filme.nome, (*p)->filme->info.filme.nome) > 0){ // filme > p
+		int aux = inserir_filme_fav(&(*p)->prox, filme);
+		
+		if (aux != 1){
+			NoLista *new = (NoLista *) malloc(sizeof(NoLista));
+			
+			if (new != NULL){
+				new->filme = *filme;
+				new->prox = (*p)->prox;
+				(*p)->prox = new;
+
+				(*filme)->info.filme.frequencia++;
+				
+				return 1;
+			} else {
+				return 0;
+			}
+		} else
+			return aux;
+	} else { // filme == p
+		return 0;
+	}
 }
 
-int inserirListaNroUSP(No *raiz_filme, NoLista **p, elem *x){
-    return 0;
+int remover_filme_fav(NoLista **p, No **filme){
+	if (*p == NULL)
+		return 0;
+
+	int aux;
+	NoLista *rem;
+
+	if ((*p)->filme == NULL){
+		aux = remover_filme_fav(&(*p)->prox, filme);
+		if (aux == -1){
+			rem = (*p)->prox;
+			(*p)->prox = rem->prox;
+			free(rem);
+			
+			(*filme)->info.filme.frequencia--;
+			
+			return 1;
+		}
+		return aux;
+	}
+	
+	if (strcmp((*filme)->info.filme.nome, (*p)->filme->info.filme.nome) == 0) // filme == p
+		return -1;
+	
+	aux = remover_filme_fav(&(*p)->prox, filme);
+
+	if (aux == -1){
+		rem = (*p)->prox;
+		(*p)->prox = rem->prox;
+		free(rem);
+		
+		(*filme)->info.filme.frequencia--;
+		
+		return 1;
+	}
+
+	return aux;
 }
 
-int removerListaNroUSP(No *raiz_filme, NoLista **p, elem *x){
-    return 0;
+int limpar_filmes_fav(NoLista **p, No **raiz_filmes){
+	if (*p == NULL)
+		return 1;
+	
+	if ((*p)->filme == NULL){
+		int aux = limpar_filmes_fav(&(*p)->prox, raiz_filmes);
+
+		if (aux){
+			free(*p);
+			*p = NULL;
+			return 1;
+		}
+
+		return aux;
+	}
+	
+	if (limpar_filmes_fav(&(*p)->prox, raiz_filmes)){
+		(*p)->filme->info.filme.frequencia--;
+
+		if ((*p)->filme->info.filme.frequencia == 0){
+			elem aux;
+
+			aux.info.filme.nome = (*p)->filme->info.filme.nome;
+			aux.tipo = Filme;
+
+			if (!remover(raiz_filmes, &aux))
+				return 0;
+		}
+
+		free(*p);
+		*p = NULL;
+
+		return 1;
+	}
+
+	return 0;
 }
 
-int inserir_aluno(No **p, elem *x, NoLista *s){
-    return 0;
+int filmes_fav_comum(No **p, No **q){
+	NoLista *i, *j;
+
+	i = (*p)->info.aluno.filmes_fav->prox;
+	j = (*q)->info.aluno.filmes_fav->prox;
+
+	int comum = 0;
+
+	while (i != NULL && j != NULL){
+		if (strcmp(j->filme->info.filme.nome, i->filme->info.filme.nome) < 0) // j < i --> j++
+			j = j->prox;
+		else if (strcmp(j->filme->info.filme.nome, i->filme->info.filme.nome) > 0) // j > i --> i++
+			i = i->prox;
+		else { // j = i --> comum++ e i++ e j++
+			comum++;
+			i = i->prox;
+			j = j->prox;
+		}
+	}
+
+	return comum;
 }
 
-int remover_aluno(No **p, elem *x){
-    return 0;
+void sugerir_similar(No **p, No **aluno, No ***max_no, int *max_comum){
+	if (*p == NULL) return;
+
+	sugerir_similar(&(*p)->esq, aluno, max_no, max_comum);
+
+	if (p != aluno){
+		int aux = filmes_fav_comum(p, aluno);
+
+		if (aux >= *max_comum) {
+			*max_no = p;
+			*max_comum = aux;
+		}
+	}
+
+	sugerir_similar(&(*p)->dir, aluno, max_no, max_comum);
 }
 
-No *sugerir_similar(No *p, elem *x){
-    return NULL;
+void sugerir_diferente(No **p, No **aluno, No ***min_no, int *min_comum){
+    if (*p == NULL) return;
+
+	sugerir_diferente(&(*p)->esq, aluno, min_no, min_comum);
+
+	if (p != aluno){
+		int aux = filmes_fav_comum(p, aluno);
+
+		if (aux <= *min_comum) {
+			*min_no = p;
+			*min_comum = aux;
+		}
+	}
+
+	sugerir_diferente(&(*p)->dir, aluno, min_no, min_comum);
 }
 
-No *sugerir_inedito(No *p, elem *x){
-    return NULL;
-}
+int carregar_arquivo(AVL **A, AVL **F){
+    FILE *f = fopen("./src/entrada_sistema.txt", "r");
 
-int salvar_sistema(No *p){
-    return 0;
-}
+    char line[800];
+    char *tok;
+    No **p, **q;
+    elem x;
+    int aux = 1, test;
 
-int numero_alunos(No *p){
-    if (p != NULL) return 0;
+    while (fgets(line, 800, f) != NULL){
+        line[strcspn(line, "\n")] = 0;
 
-    return 1 + numero_alunos(p->esq) + numero_alunos(p->dir);
-}
+        tok = strtok(line, ";"); // tok = NOME_ALUNO
+        x.info.aluno.nome = tok;
 
-int maior_FB(No *p){
-    if (p == NULL) return 0;
+        if (tok != NULL){
+            tok = strtok(NULL, ";"); // tok = NROUSP
+            if (tok == NULL) // Tem nome mas nao tem NROUSP
+                aux = 0;
+            else {
+                x.info.aluno.nroUSP = atoi(tok);
 
-    if (p->FB == -1 || p->FB == 1) return 1;
-    int E = maior_FB(p->esq);
-    int D = maior_FB(p->dir);
+                x.tipo = Aluno;
 
-    return E || D;
-}
+                if (!inserir(&(*A)->raiz, &x))
+                    aux = 0;
+                else {
+                    p = buscar(&(*A)->raiz, &x);
+                    if (p == NULL)
+                        aux = 0;
+                    else {
+                        while ((tok = strtok(NULL, ";")) != NULL){ // tok = FILME_FAV_i
+                            x.info.filme.nome = tok;
 
-int inserir_de_arquivo(No **p, char *nome_arquivo){
-    return 0;
+                            x.tipo = Filme;
+
+                            test = inserir(&(*F)->raiz, &x);
+                            q = buscar(&(*F)->raiz, &x);
+
+                            if (q != NULL){
+                                if (!test) (*q)->info.filme.frequencia--;
+
+                                if (inserir_filme_fav(&(*p)->info.aluno.filmes_fav, q) != 1)
+                                    aux = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return aux;
 }
