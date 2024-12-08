@@ -1,0 +1,7 @@
+Joao;54;Alien;Geladeira Diabólica
+Violeta;70;Titanic
+Maria;123;Alien;Rambo;Vingadores
+Pedro;201;Toy Story;Vingadores
+Matias;172831
+Pedro;193812;Inception;Vingadores
+Maria;4910231;Inception
